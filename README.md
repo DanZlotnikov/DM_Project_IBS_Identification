@@ -1,7 +1,20 @@
 # **Implicit Biased Set (IBS) Identification Algorithm**
 
 ## **Overview**
-This script implements an **Implicit Biased Set (IBS) Identification Algorithm** to detect **biased subgroups** in datasets using protected attributes. It processes datasets, computes imbalance ratios, and visualizes results.
+This project implements an **Implicit Biased Set (IBS) Identification Algorithm** to detect **biased subgroups** in datasets using protected attributes. It processes datasets, computes imbalance ratios, and visualizes results.
+
+We based our work on the paper: **Yin Lin, Samika Gupta, H. V. Jagadish: Mitigating Subgroup Unfairness in Machine Learning Classifiers: A Data-Driven Approach. ICDE 2024: 2151–2163**.
+
+As a result of some package deprections and codebase dependency changes, the original code referenced by the paper did not execute properly. We took the ideas & algorithms from the paper and implemented them exactly as presented in the paper, while using the original code as reference point.
+
+**In this project, we use the IBS algorithm on 4 datasets, and answer the following questions:**
+1. What are the IBS of each dataset?
+2. Which IBS requires the most amount of data massaging?
+3. How do K values affect the runtime of the algorithm?
+4. How do imbalance threshold values affect the amount of required data massaging?
+
+
+We hope you enjoy our work and find it interesting.
 
 ---
 
