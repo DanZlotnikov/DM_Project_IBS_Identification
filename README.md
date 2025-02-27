@@ -9,9 +9,10 @@ As a result of some dependency deprecation and codebase changes, the original co
 
 **In this project, we use the IBS algorithm on 4 datasets, and answer the following questions:**
 1. What are the IBS of each dataset?
-2. Which IBS requires the most amount of data massaging?
-3. How do K values affect the runtime of the algorithm?
-4. How do imbalance threshold values affect the amount of required data massaging?
+2. How do different K & imbalance threshold values affect number of required updates in each IBS?
+3. Which IBS requires the most amount of data massaging?
+4. How do K values affect the runtime of the algorithm?
+5. How do imbalance threshold values affect the amount of required data massaging?
 
 
 We hope you enjoy our work and find it interesting.
