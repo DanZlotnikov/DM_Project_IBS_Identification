@@ -5,7 +5,7 @@ This project implements an **Implicit Biased Set (IBS) Identification Algorithm*
 
 We based our work on the paper: **Yin Lin, Samika Gupta, H. V. Jagadish: Mitigating Subgroup Unfairness in Machine Learning Classifiers: A Data-Driven Approach. ICDE 2024: 2151–2163**.
 
-As a result of some package deprections and codebase dependency changes, the original code referenced by the paper did not execute properly. We took the ideas & algorithms from the paper and implemented them exactly as presented in the paper, while using the original code as reference point.
+As a result of some dependency deprecation and codebase changes, the original code referenced by the paper did not execute properly. We took the ideas & algorithms from the paper and implemented them exactly as presented in the paper, while using the original code as reference point.
 
 **In this project, we use the IBS algorithm on 4 datasets, and answer the following questions:**
 1. What are the IBS of each dataset?
