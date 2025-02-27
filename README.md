@@ -115,6 +115,7 @@ run_tests(X, check_cols, y)
 ## **Datasets Used**
 ### **German Credit Data (`german_credit_data.csv`)**
 - **Protected attributes:** `['Age', 'Sex', 'Job', 'Saving accounts']`
+- Converts `1/2` → `0/1` in **'SUSPECT_ARRESTED_FLAG'**.
 - **Target variable:** `'class'`
 - Runs `run_tests()`.
 
