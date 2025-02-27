@@ -129,7 +129,7 @@ run_tests(X, check_cols, y)
 - Runs `run_tests()`.
 
 ### **Credit Card Default (`default of credit card clients.xls`)**
-- **Protected attributes:** `['X2', 'X3', 'X4', 'X5']`
+- **Protected attributes:** `['SEX', 'EDUCATION', 'MARRIAGE', 'AGE']`
 - **Target variable:** `'Y'`
 - Runs `run_tests()`.
 
