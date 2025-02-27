@@ -126,11 +126,12 @@ run_tests(X, check_cols, y)
 ### **Stop, Question, and Frisk (`SQFD - CY 2017.csv`)**
 - Converts `Y/N` → `1/0` in **'SUSPECT_ARRESTED_FLAG'**.
 - **Protected attributes:** `['Age', 'Sex', 'Race']`
+- **Target variable:** `'SUSPECT_ARRESTED_FLAG'`
 - Runs `run_tests()`.
 
 ### **Credit Card Default (`default of credit card clients.xls`)**
 - **Protected attributes:** `['SEX', 'EDUCATION', 'MARRIAGE', 'AGE']`
-- **Target variable:** `'Y'`
+- **Target variable:** `default payment next month`
 - Runs `run_tests()`.
 
 ---
