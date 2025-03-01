@@ -59,17 +59,24 @@
     function appendNewImages(containerId, images, runFolder, category) {
         const container = document.getElementById(containerId);
 
+        // Check if "Generating Data..." message already exists
+        let existingMessage = container.querySelector(".loading-message");
+
         if (!Array.isArray(images) || images.length === 0) {
-            let waiting = document.createElement("p");
-            p.innerHTML = "Generating data..."
-            container.appendChild(waiting);
+            if (!existingMessage) {  // Only create it if it doesn't exist
+                let p = document.createElement("p");
+                p.innerText = "Generating Data...";
+                p.classList.add("loading-message");  // Assign a class for easy removal
+                container.appendChild(p);
+            }
             return;
         }
 
         images.forEach(img => {
             if (!displayedImages.has(img)) {  // Only add new images
                 displayedImages.add(img);
-                
+                document.querySelectorAll(".loading-message").forEach(el => el.remove());
+
                 let imgElement = document.createElement("img");
                 imgElement.src = "{{ url_for('static', filename='') }}" + runFolder + (category ? "/" + category : "") + "/" + img;
                 imgElement.alt = category + " Image";
