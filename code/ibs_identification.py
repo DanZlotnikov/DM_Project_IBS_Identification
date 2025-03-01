@@ -229,7 +229,7 @@ def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_
   plt.xticks(rotation=90, ha="right")
   plt.xlabel("Subgroups of Protected Attributes")
   plt.ylabel("Need Pos / Need Neg")
-  plt.title("Imbalance Identification Scatter Plot")
+  plt.title(f"Imbalance Identification Scatter Plot | K={k}m Imbalance Threshold={imbalance_threshold}")
   plt.legend()
   _save_plot(run_folder, f"{time.time()}-Imbalance Identification_K={k},Threshold={imbalance_threshold}.png")
   return excute_time, max_update_vals

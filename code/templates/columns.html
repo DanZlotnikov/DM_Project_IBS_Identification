@@ -9,8 +9,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>Columns/Values from {{ selected_file }}</h1>
-    <p>Select the items you want from the first row:</p>
+    <h1>Parameter Selection</h1>
+    <p>Select the protected attributes:</p>
 
     <!-- Form that posts the selected checkboxes, dropdown values, and hidden file name -->
     <form method="POST" action="/process_columns">
@@ -25,7 +25,8 @@
           </label>
         </div>
       {% endfor %}
-
+      
+      <p>Select the maximum K & Threshold values:</p>
       <!-- Dropdown for K value (10 to 100 in steps of 10) -->
       <div class="dropdown">
         <label for="k_value">Select K value:</label>
