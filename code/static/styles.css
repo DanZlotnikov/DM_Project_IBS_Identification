@@ -1,0 +1,92 @@
+/* Reset default styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 
+ Body styling with a subtle gradient background. 
+ Remove display: flex; align-items: center; justify-content: center; 
+ so the container can grow vertically as needed.
+*/
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Container styling for a centered, responsive "card" */
+.container {
+  background: #fff;
+  margin: 0 auto;          /* Centers the container horizontally */
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: fit-content;              /* A responsive width */
+}
+
+/* Heading styling */
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+}
+
+/* Paragraph styling */
+p {
+  color: #666;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* Checkbox group spacing */
+.checkbox-group {
+  margin: 10px 0;
+}
+
+/* Dropdown styling (if you use it on this page) */
+.dropdown {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.dropdown label {
+  font-size: 1rem;
+  color: #333;
+  margin-right: 10px;
+}
+
+.dropdown select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.dropdown select:focus {
+  border-color: #007bff;
+}
+
+/* Submit button styling */
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

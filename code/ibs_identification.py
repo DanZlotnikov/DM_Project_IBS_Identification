@@ -20,8 +20,12 @@ import csv
 import warnings
 import itertools
 import seaborn as sns
+import matplotlib
+matplotlib.use('Agg')  # Use the non-interactive Agg backend
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import io, base64
+import os
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter('ignore')
@@ -30,6 +34,28 @@ warnings.simplefilter('ignore')
 
 ### Get Protected attributes data
 """
+
+def _make_run_folder(prefix):
+    """
+    Create a unique folder in static/runs based on current time.
+    Returns the relative path to that folder (e.g. 'runs/gcd_1677699482').
+    """
+    run_id = int(time.time())  # or use uuid.uuid4() for more uniqueness
+    folder_name = f"{prefix}_{run_id}"
+    # We'll store runs in 'static/runs/<prefix>_<timestamp>'
+    run_folder = os.path.join("code\\static", "runs", folder_name)
+    os.makedirs(run_folder, exist_ok=True)
+    os.makedirs(os.path.join(run_folder, "K"), exist_ok=True)
+    os.makedirs(os.path.join(run_folder, "Threshold"), exist_ok=True)
+    # Return the relative path that Flask can use: 'runs/<prefix>_<timestamp>'
+    return os.path.join("runs", folder_name)
+
+def _save_plot(run_folder, file_name):
+    save_path = os.path.join("code", "static", run_folder, file_name)
+    with open(save_path, "w"):
+      plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+
 
 def get_protected_attr_data(data, protected_attr, y_label):
     # Extract necessary columns first
@@ -45,8 +71,6 @@ def get_protected_attr_data(data, protected_attr, y_label):
 
     return cnt_protected_with_y, cnt_protected, protected_data
 
-"""### Get node parents and counts in regions"""
-
 # GET PARENTS and counts of regions
 def get_parents_and_cnt_regions(data, protected_att, label):
 
@@ -61,8 +85,6 @@ def get_parents_and_cnt_regions(data, protected_att, label):
         grrpby_data_lst.append(temp_df)
     return grrpby_data_lst
 
-"""### Construct Hierarchy"""
-
 def construct_hierarchy(protected_attributes):
     hierarchy = {}
     for i in range(1, len(protected_attributes) + 1):
@@ -70,11 +92,6 @@ def construct_hierarchy(protected_attributes):
             hierarchy[len(hierarchy)] = list(combo)
     return hierarchy
 
-"""## Calculate ratio rn
-
-
-
-"""
 
 def Calculate_ratio_rn(group_lst,parents, pos, neg):
 
@@ -153,7 +170,7 @@ def handle_imbalance(ratio_rn, pos, neg, group_lst, need_pos, need_neg, imbalanc
 
 """
 
-def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_threshold, k, verbose=True):
+def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_threshold, k, run_folder, verbose=True):
   """Identifies sets with potential biases based on protected attributes."""
   start_time = time.time()
   hierarchy = construct_hierarchy(protected_attr)
@@ -195,8 +212,8 @@ def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_
   end_time = time.time()
   excute_time = end_time - start_time
 
-  if (len(attrs) is not 0):
-    max_update_vals = max(attrs, key=lambda x: x['need_total'])['need_total'] if len(attrs) is not 0 else 0
+  if (len(attrs) != 0):
+    max_update_vals = max(attrs, key=lambda x: x['need_total'])['need_total'] if len(attrs) != 0 else 0
 
     print('Subgroup with most required total updates is: ', max(attrs, key=lambda x: x['need_total'])['x_label'])
 
@@ -214,30 +231,30 @@ def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_
   plt.ylabel("Need Pos / Need Neg")
   plt.title("Imbalance Identification Scatter Plot")
   plt.legend()
-  plt.show()
+  _save_plot(run_folder, f"{time.time()}-Imbalance Identification_K={k},Threshold={imbalance_threshold}.png")
   return excute_time, max_update_vals
 
 """# Run Dataset tests
 
 """
 
-def run_tests(X, check_cols, y):
+def run_tests(X, check_cols, y, run_folder, k_value, threshold_value):
 
   ks = []
   times = []
   thres = []
   maxs = []
 
-  for i in range(10, 100, 10):
+  for i in range(0, int(k_value), 10):
     print("K: ", i, "imbalance threshold: 0.1")
     ks.append(i)
-    excute_time, _ = implicit_biased_set_identification(X, check_cols, y, 0.1, i, True)
+    excute_time, _ = implicit_biased_set_identification(X, check_cols, y, 0.1, i, os.path.join(run_folder, "K"), True)
     times.append(excute_time)
 
-  for i in np.arange(0.1, 0.8, 0.1):
+  for i in np.arange(0, float(threshold_value), 0.1):
     print("imbalance threshold: ", i, "K: 30")
     thres.append(i)
-    _, max_update_vals = implicit_biased_set_identification(X, check_cols, y, i, 30, True)
+    _, max_update_vals = implicit_biased_set_identification(X, check_cols, y, i, 30, os.path.join(run_folder, "Threshold"), True)
     maxs.append(max_update_vals)
 
   plt.figure(figsize=(10, 6))
@@ -248,7 +265,7 @@ def run_tests(X, check_cols, y):
   plt.ylabel("Execution Time")
   plt.title("Runtime as a function of K")
   plt.legend()
-  plt.show()
+  _save_plot(run_folder, "Runtime as a function of K.png")
 
   plt.figure(figsize=(10, 6))
   sns.lineplot(x=thres, y=maxs, color='blue', marker='o')
@@ -259,58 +276,65 @@ def run_tests(X, check_cols, y):
   plt.ylabel("Max Total Updates Required")
   plt.title("Max Total Updates as a function of Imbalance Threshold")
   plt.legend()
-  plt.show()
+  _save_plot(run_folder, "Max Total Updates as a function of Imbalance Threshold.png")
+
+  return run_folder
 
 """### German Credit Data dataset"""
+def run_gcd(selected_columns, k_value, threshold_value):
+  run_folder = _make_run_folder("gcd")
+  data_gcd = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'german_credit_data.csv'))
 
-data_gcd = pd.read_csv('german_credit_data.csv')
+  # class is 1/2 instead of 0/1
+  data_gcd['class'] = data_gcd['class'] - 1
 
-# class is 1/2 instead of 0/1
-data_gcd['class'] = data_gcd['class'] - 1
+  columns_gcd = ['Age', 'Sex', 'Job', 'Saving accounts']
+  gcd_y = 'class'
+  X_gcd = pd.DataFrame(data_gcd)
 
-columns_gcd = ['Age', 'Sex', 'Job', 'Saving accounts']
-gcd_y = 'class'
-X_gcd = pd.DataFrame(data_gcd)
-
-run_tests(X_gcd, columns_gcd, gcd_y)
+  return run_tests(X_gcd, selected_columns, gcd_y, run_folder, k_value, threshold_value)
 
 """### COMPAS Dataset
 
 """
 
-url = "https://raw.githubusercontent.com/niceIrene/remedy/main/datasets/CleanAdult_numerical_cat.csv"
-X_compas = pd.read_csv(url)
+def run_compas(selected_columns, k_value, threshold_value):
+  data_compas = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'CleanAdult_numerical_cat.csv'))
+  run_folder = _make_run_folder("compas")
 
-# protected attributes
-columns_compas = ['age', 'marital-status','relationship', 'race','gender', 'native-country']
-columns_all = ['age', 'workclass','education', 'educational-num', 'marital-status', 'occupation', 'relationship', 'race', 'gender', 'capital-gain', 'capital-loss','hours-per-week', 'native-country']
-compas_y = 'income'
-run_tests(X_compas, columns_compas, compas_y)
+  # protected attributes
+  columns_compas = ['age', 'marital-status','relationship', 'race','gender', 'native-country']
+  compas_y = 'income'
+  return run_tests(data_compas, selected_columns, compas_y, run_folder, k_value, threshold_value)
 
 """### Stop, Question and Frisk
 
 """
 
-data_sqfd = pd.read_csv('SQFD - CY 2017.csv')
+def run_sqfd(selected_columns, k_value, threshold_value):
+  data_sqfd = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'SQFD - CY 2017.csv'))
+  run_folder = _make_run_folder("sqfd")
 
-# SUSPECT_ARRESTED_FLAG is Y/N instead of 0/1
-data_sqfd = data_sqfd.replace({"Y": 1, "N": 0})
+  # SUSPECT_ARRESTED_FLAG is Y/N instead of 0/1
+  data_sqfd = data_sqfd.replace({"Y": 1, "N": 0})
 
-columns_sqfd = ['Age', 'Sex', 'Race']
+  columns_sqfd = ['Age', 'Sex', 'Race']
 
-sqfd_y = 'SUSPECT_ARRESTED_FLAG'
+  sqfd_y = 'SUSPECT_ARRESTED_FLAG'
 
-X_sqfd = pd.DataFrame(data_sqfd)
-run_tests(X_sqfd, columns_sqfd, sqfd_y)
+  X_sqfd = pd.DataFrame(data_sqfd)
+  return run_tests(X_sqfd, selected_columns, sqfd_y, run_folder, k_value, threshold_value)
 
 """### Default of credit card clients
 
 """
 
-data_ccc = pd.read_excel('default of credit card clients.xls')
+def run_ccc(selected_columns, k_value, threshold_value):
+  data_ccc = pd.read_excel(os.path.join(os.path.dirname(__file__), 'files', 'default_of_credit_card_clients.xls'))
+  run_folder = _make_run_folder("ccc")
 
-# X2: SEX, X3: EDUCATION, X4: MARRIAGE, X5: AGE
-columns_ccc = ['X2', 'X3', 'X4', 'X5']
-ccc_y = 'Y'
-X_ccc = pd.DataFrame(data_ccc)
-run_tests(X_ccc, columns_ccc, ccc_y)
+  # X2: SEX, X3: EDUCATION, X4: MARRIAGE, X5: AGE
+  columns_ccc = ['X2', 'X3', 'X4', 'X5']
+  ccc_y = 'Y'
+  X_ccc = pd.DataFrame(data_ccc)
+  return run_tests(X_ccc, selected_columns, ccc_y, run_folder, k_value, threshold_value)

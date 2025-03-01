@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Container for a row of images */
+    .image-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    /* Each image container takes up 20% of the row width (5 images per row) */
+    .image-container {
+      flex: 0 0 calc(30% - 10px);
+      text-align: center;
+    }
+    .image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    /* Section header styling */
+    .section-header {
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.5em;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Results</h1>
+
+    <div class="section-header">K Images</div>
+    <div class="image-row">
+      {% if k_images %}
+        {% for img in k_images %}
+          <div class="image-container">
+            <img src="{{ url_for('static', filename=run_folder ~ '/K/' ~ img) }}"
+                 alt="K Image">
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No images found.</p>
+      {% endif %}
+    </div>
+
+    <div class="section-header">Threshold Images</div>
+    <div class="image-row">
+      {% if thres_images %}
+        {% for img in thres_images %}
+          <div class="image-container">
+            <img src="{{ url_for('static', filename=run_folder ~ '/Threshold/' ~ img) }}"
+                 alt="Threshold Image">
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No images found.</p>
+      {% endif %}
+    </div>
+
+    <div class="section-header">General Images</div>
+    <div class="image-row">
+      {% if gen_images %}
+        {% for img in gen_images %}
+          <div class="image-container">
+            <img src="{{ url_for('static', filename=run_folder ~ '/' ~ img) }}"
+                 alt="General Image">
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No images found.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

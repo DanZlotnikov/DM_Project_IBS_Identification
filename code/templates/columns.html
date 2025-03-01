@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Choose Columns</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <!-- Import Google Fonts for a modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>Columns/Values from {{ selected_file }}</h1>
+    <p>Select the items you want from the first row:</p>
+
+    <!-- Form that posts the selected checkboxes, dropdown values, and hidden file name -->
+    <form method="POST" action="/process_columns">
+      <!-- Hidden input for the selected file name -->
+      <input type="hidden" name="selected_file" value="{{ selected_file }}">
+
+      {% for col in columns %}
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" name="columns" value="{{ col }}">
+            {{ col }}
+          </label>
+        </div>
+      {% endfor %}
+
+      <!-- Dropdown for K value (10 to 100 in steps of 10) -->
+      <div class="dropdown">
+        <label for="k_value">Select K value:</label>
+        <select id="k_value" name="k_value">
+          {% for i in range(10, 101, 10) %}
+            <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Dropdown for Imbalance Threshold -->
+      <div class="dropdown">
+        <label for="threshold_value">Select Imbalance Threshold:</label>
+        <select id="threshold_value" name="threshold_value">
+          {% for val in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] %}
+            <option value="{{ val }}">{{ val }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>

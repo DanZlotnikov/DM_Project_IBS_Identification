@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select File</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Import Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to My Flask App!</h1>
+        <p>Please choose a file from the dropdown below:</p>
+        
+        <!-- Form that posts to /select -->
+        <form method="POST" action="/select">
+            <div class="dropdown">
+                <label for="options">Choose a file:</label>
+                <select id="options" name="options">
+                    <!-- value = actual filename; display text = prettified name -->
+                    <option value="CleanAdult_numerical_cat.csv">COMPAS</option>
+                    <option value="default_of_credit_card_clients.xls">Default of Credit Card Clients</option>
+                    <option value="german_credit_data.csv">German Credit Data</option>
+                    <option value="SQFD - CY 2017.csv">Stop, Question & Frisk</option>
+                </select>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
