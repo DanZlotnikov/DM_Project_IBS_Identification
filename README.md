@@ -38,24 +38,93 @@ We hope you enjoy our work and find it interesting.
 ### **Dependencies:**
 Ensure you have the required Python libraries installed:
 ```bash
-pip install pandas numpy seaborn matplotlib sympy
+pip install Flask pandas numpy seaborn matplotlib sympy openpyxl
 ```
 
 ---
 
 ## **Usage**
-To run the IBS Identification Algorithm on a dataset:
-```python
-from ibs_identification import implicit_biased_set_identification
+To run the IBS Identification Algorithm manually without the Flask UI, execute:
 
-time_taken, max_updates = implicit_biased_set_identification(data, protected_attributes, y_label, imbalance_threshold=0.1, k=10)
+```bash
+python ibs_identification.py
 ```
 
-To execute **predefined dataset tests**, run:
+Alternatively, run specific functions within a Python script:
+
 ```python
-from ibs_identification import run_tests
-run_tests(X, check_cols, y)
+import ibs_identification
+
+# Load dataset
+data = ibs_identification.load_dataset("files/german_credit_data.csv")
+
+# Run IBS Identification with custom parameters
+result = ibs_identification.implicit_biased_set_identification(
+    data, protected_attr=["Sex", "Age"], y_label="class",
+    imbalance_threshold=0.1, k=50
+)
+print(result)
 ```
+
+To visualize results:
+```python
+ibs_identification.plot_results(result)
+```
+
+---
+
+## **Flask and UI Application**
+
+This repository includes a **Flask-based web interface** for interactively selecting datasets, choosing processing parameters, and visualizing results.
+
+### **Project Structure**
+
+```
+DM_Project_IBS_Identification/
+├── code/
+│   ├── app.py                    # Flask application entry point
+│   ├── ibs_identification.py     # IBS Identification module with additional plotting functions
+│   ├── files/                    # Dataset files (e.g., german_credit_data.csv, default of credit card clients.xls, etc.)
+│   ├── static/                   # Static files: CSS, dynamically generated image runs (under static/runs/)
+│   └── templates/                # HTML templates:
+│         ├── welcome.html        # Welcome page for file selection
+│         ├── columns.html        # Page to select columns and numerical parameters (K value, Imbalance Threshold)
+│         └── results.html        # Results page displaying generated images
+└── README.md                     # Project documentation (this file)
+```
+
+### **How It Works**
+
+1. **File Selection (Welcome Page):**
+   - Users choose a dataset from a dropdown menu on the `welcome.html` page.
+   - The backend processes the file name while keeping its original structure.
+
+2. **Parameter Selection (Columns Page):**
+   - The first row of the dataset is extracted and displayed as selectable checkboxes.
+   - Users choose:
+     - Columns to analyze
+     - K-value (10-100, increments of 10)
+     - Imbalance threshold (0.1-0.9)
+   - The selected file name is stored and passed for processing.
+
+3. **Processing and Results (Results Page):**
+   - The appropriate function from `ibs_identification.py` runs based on the dataset.
+   - Generated plots are saved in a **unique timestamped folder** (`static/runs/`).
+   - Images are categorized into "K Images", "Threshold Images", and "General Images".
+   - The `results.html` page displays images in rows (5 per row) under section headers.
+
+### **Running the Web App**
+
+1. **Start the Flask App:**
+   ```bash
+   python code/app.py
+   ```
+   The app starts at [http://127.0.0.1:5000/](http://127.0.0.1:5000/).
+
+2. **Using the UI:**
+   - Select a file from the dropdown.
+   - Choose columns and parameters.
+   - Submit to process and view results.
 
 ---
 
