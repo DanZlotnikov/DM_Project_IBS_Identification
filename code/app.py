@@ -1,10 +1,29 @@
 import os
 import csv
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import ibs_identification  # your updated module with run_* functions
+import time
+import threading
 
 app = Flask(__name__)
+
+run_folder = ''
+
+def _make_run_folder(prefix):
+    """
+    Create a unique folder in static/runs based on current time.
+    Returns the relative path to that folder (e.g. 'runs/gcd_1677699482').
+    """
+    run_id = int(time.time())  # or use uuid.uuid4() for more uniqueness
+    folder_name = f"{prefix}_{run_id}"
+    # We'll store runs in 'static/runs/<prefix>_<timestamp>'
+    run_folder = os.path.join("code\\static", "runs", folder_name)
+    os.makedirs(run_folder, exist_ok=True)
+    os.makedirs(os.path.join(run_folder, "K"), exist_ok=True)
+    os.makedirs(os.path.join(run_folder, "Threshold"), exist_ok=True)
+    # Return the relative path that Flask can use: 'runs/<prefix>_<timestamp>'
+    return os.path.join("runs", folder_name)
 
 @app.route('/')
 def index():
@@ -29,24 +48,39 @@ def select():
 
     return render_template('columns.html', selected_file=selected_file, columns=first_row)
 
+def run_ibs_processing(run_folder, selected_file, selected_columns, k_value, threshold_value):
+    # Decide which function to call based on the file
+    if selected_file == "german_credit_data.csv":
+        ibs_identification.run_gcd(run_folder, selected_columns, k_value, threshold_value)
+    elif selected_file == "default_of_credit_card_clients.xls":
+        ibs_identification.run_ccc(run_folder, selected_columns, k_value, threshold_value)
+    elif selected_file == "CleanAdult_numerical_cat.csv":
+        ibs_identification.run_compas(run_folder, selected_columns, k_value, threshold_value)
+    elif selected_file == "SQFD - CY 2017.csv":
+        ibs_identification.run_sqfd(run_folder, selected_columns, k_value, threshold_value)
+    else:
+        run_folder = None
+
 @app.route('/process_columns', methods=['POST'])
 def process_columns():
     selected_columns = request.form.getlist('columns')
     k_value = request.form.get('k_value')
     threshold_value = request.form.get('threshold_value')
     selected_file = request.form.get('selected_file')
-
-    # Decide which function to call based on the file
+    global run_folder
+    
     if selected_file == "german_credit_data.csv":
-        run_folder = ibs_identification.run_gcd(selected_columns, k_value, threshold_value)
+        run_folder = _make_run_folder("gcd")
     elif selected_file == "default_of_credit_card_clients.xls":
-        run_folder = ibs_identification.run_ccc(selected_columns, k_value, threshold_value)
+        run_folder = _make_run_folder("ccc")
     elif selected_file == "CleanAdult_numerical_cat.csv":
-        run_folder = ibs_identification.run_compas(selected_columns, k_value, threshold_value)
+        run_folder = _make_run_folder("compas")
     elif selected_file == "SQFD - CY 2017.csv":
-        run_folder = ibs_identification.run_sqfd(selected_columns, k_value, threshold_value)
-    else:
-        run_folder = None
+        run_folder = _make_run_folder("sqfd")
+    
+    # Start IBS identification in a separate thread
+    processing_thread = threading.Thread(target=run_ibs_processing, args=(run_folder, selected_file, selected_columns, k_value, threshold_value))
+    processing_thread.start()
 
     if run_folder:
         folder_path = os.path.join('code', 'static', run_folder) 
@@ -67,6 +101,22 @@ def process_columns():
                                gen_images=gen_images)
     else:
         return "Invalid file selected."
+@app.route('/get_images')
+def get_images():
+    """Fetch newly generated images dynamically while IBS runs."""
+    global run_folder
+    folder_path = os.path.join("code", "static", run_folder)
+    if not os.path.exists(folder_path):
+        return jsonify({"k_images": [], "thres_images": [], "gen_images": []})
+
+    k_folder = os.path.join(folder_path, "K")
+    thres_folder = os.path.join(folder_path, "Threshold")
+
+    k_images = sorted([img for img in os.listdir(k_folder) if img.lower().endswith('.png')]) if os.path.exists(k_folder) else []
+    thres_images = sorted([img for img in os.listdir(thres_folder) if img.lower().endswith('.png')]) if os.path.exists(thres_folder) else []
+    gen_images = sorted([img for img in os.listdir(folder_path) if img.lower().endswith('.png') and img not in k_images and img not in thres_images])
+
+    return jsonify({"k_images": k_images, "thres_images": thres_images, "gen_images": gen_images})
 
 if __name__ == '__main__':
     app.run(debug=True)

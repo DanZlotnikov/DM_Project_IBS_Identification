@@ -11,7 +11,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    /* Each image container takes up 20% of the row width (5 images per row) */
+    /* Each image container takes up 30% of the row width (3 images per row) */
     .image-container {
       flex: 0 0 calc(30% - 10px);
       text-align: center;
@@ -31,52 +31,74 @@
       padding-bottom: 5px;
     }
   </style>
+  <script>
+    let displayedImages = new Set();  // Track already displayed images
+
+    function loadImages() {
+        fetch('/get_images')
+            .then(response => response.json())
+            .then(data => {
+                if (!data || typeof data !== 'object') {
+                    console.error("Invalid response format:", data);
+                    return;
+                }
+
+                const runFolder = "{{ run_folder }}";  // Use the correct folder
+                if (!runFolder) {
+                    console.error("Run folder is not set.");
+                    return;
+                }
+
+                appendNewImages("k_images_container", data.k_images || [], runFolder, "K");
+                appendNewImages("thres_images_container", data.thres_images || [], runFolder, "Threshold");
+                appendNewImages("gen_images_container", data.gen_images || [], runFolder, "");
+            })
+            .catch(error => console.error("Error loading images:", error));
+    }
+
+    function appendNewImages(containerId, images, runFolder, category) {
+        const container = document.getElementById(containerId);
+
+        if (!Array.isArray(images) || images.length === 0) {
+            let waiting = document.createElement("p");
+            p.innerHTML = "Generating data..."
+            container.appendChild(waiting);
+            return;
+        }
+
+        images.forEach(img => {
+            if (!displayedImages.has(img)) {  // Only add new images
+                displayedImages.add(img);
+                
+                let imgElement = document.createElement("img");
+                imgElement.src = "{{ url_for('static', filename='') }}" + runFolder + (category ? "/" + category : "") + "/" + img;
+                imgElement.alt = category + " Image";
+                imgElement.style = "max-width: 100%; margin: 5px;";
+
+                let imgWrapper = document.createElement("div");
+                imgWrapper.classList.add("image-container");
+                imgWrapper.appendChild(imgElement);
+
+                container.appendChild(imgWrapper);
+            }
+        });
+    }
+
+    setInterval(loadImages, 2000);  // Poll for new images every 2 seconds
+    window.onload = loadImages;
+  </script>
 </head>
 <body>
   <div class="container">
     <h1>Results</h1>
-
     <div class="section-header">Required Data Massaging for different K values</div>
-    <div class="image-row">
-      {% if k_images %}
-        {% for img in k_images %}
-          <div class="image-container">
-            <img src="{{ url_for('static', filename=run_folder ~ '/K/' ~ img) }}"
-                 alt="K Image">
-          </div>
-        {% endfor %}
-      {% else %}
-        <p>No images found.</p>
-      {% endif %}
-    </div>
+    <div id="k_images_container" class="image-row"></div>
 
     <div class="section-header">Required Data Massaging for different Threshold values</div>
-    <div class="image-row">
-      {% if thres_images %}
-        {% for img in thres_images %}
-          <div class="image-container">
-            <img src="{{ url_for('static', filename=run_folder ~ '/Threshold/' ~ img) }}"
-                 alt="Threshold Image">
-          </div>
-        {% endfor %}
-      {% else %}
-        <p>No images found.</p>
-      {% endif %}
-    </div>
+    <div id="thres_images_container" class="image-row"></div>
 
     <div class="section-header">Runtime & Max Total Updates as functions of K & Threshold</div>
-    <div class="image-row">
-      {% if gen_images %}
-        {% for img in gen_images %}
-          <div class="image-container">
-            <img src="{{ url_for('static', filename=run_folder ~ '/' ~ img) }}"
-                 alt="General Image">
-          </div>
-        {% endfor %}
-      {% else %}
-        <p>No images found.</p>
-      {% endif %}
-    </div>
+    <div id="gen_images_container" class="image-row"></div>
   </div>
 </body>
 </html>

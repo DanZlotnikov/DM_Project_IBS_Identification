@@ -35,21 +35,6 @@ warnings.simplefilter('ignore')
 ### Get Protected attributes data
 """
 
-def _make_run_folder(prefix):
-    """
-    Create a unique folder in static/runs based on current time.
-    Returns the relative path to that folder (e.g. 'runs/gcd_1677699482').
-    """
-    run_id = int(time.time())  # or use uuid.uuid4() for more uniqueness
-    folder_name = f"{prefix}_{run_id}"
-    # We'll store runs in 'static/runs/<prefix>_<timestamp>'
-    run_folder = os.path.join("code\\static", "runs", folder_name)
-    os.makedirs(run_folder, exist_ok=True)
-    os.makedirs(os.path.join(run_folder, "K"), exist_ok=True)
-    os.makedirs(os.path.join(run_folder, "Threshold"), exist_ok=True)
-    # Return the relative path that Flask can use: 'runs/<prefix>_<timestamp>'
-    return os.path.join("runs", folder_name)
-
 def _save_plot(run_folder, file_name):
     save_path = os.path.join("code", "static", run_folder, file_name)
     with open(save_path, "w"):
@@ -229,7 +214,7 @@ def implicit_biased_set_identification(data, protected_attr, y_label, imbalance_
   plt.xticks(rotation=90, ha="right")
   plt.xlabel("Subgroups of Protected Attributes")
   plt.ylabel("Need Pos / Need Neg")
-  plt.title(f"Imbalance Identification Scatter Plot | K={k}m Imbalance Threshold={imbalance_threshold}")
+  plt.title(f"Imbalance Identification Scatter Plot | K={k}, Imbalance Threshold={imbalance_threshold}")
   plt.legend()
   _save_plot(run_folder, f"{time.time()}-Imbalance Identification_K={k},Threshold={imbalance_threshold}.png")
   return excute_time, max_update_vals
@@ -281,8 +266,7 @@ def run_tests(X, check_cols, y, run_folder, k_value, threshold_value):
   return run_folder
 
 """### German Credit Data dataset"""
-def run_gcd(selected_columns, k_value, threshold_value):
-  run_folder = _make_run_folder("gcd")
+def run_gcd(run_folder, selected_columns, k_value, threshold_value):
   data_gcd = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'german_credit_data.csv'))
 
   # class is 1/2 instead of 0/1
@@ -298,9 +282,8 @@ def run_gcd(selected_columns, k_value, threshold_value):
 
 """
 
-def run_compas(selected_columns, k_value, threshold_value):
+def run_compas(run_folder, selected_columns, k_value, threshold_value):
   data_compas = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'CleanAdult_numerical_cat.csv'))
-  run_folder = _make_run_folder("compas")
 
   # protected attributes
   columns_compas = ['age', 'marital-status','relationship', 'race','gender', 'native-country']
@@ -311,9 +294,8 @@ def run_compas(selected_columns, k_value, threshold_value):
 
 """
 
-def run_sqfd(selected_columns, k_value, threshold_value):
+def run_sqfd(run_folder, selected_columns, k_value, threshold_value):
   data_sqfd = pd.read_csv(os.path.join(os.path.dirname(__file__), 'files', 'SQFD - CY 2017.csv'))
-  run_folder = _make_run_folder("sqfd")
 
   # SUSPECT_ARRESTED_FLAG is Y/N instead of 0/1
   data_sqfd = data_sqfd.replace({"Y": 1, "N": 0})
@@ -329,9 +311,8 @@ def run_sqfd(selected_columns, k_value, threshold_value):
 
 """
 
-def run_ccc(selected_columns, k_value, threshold_value):
+def run_ccc(run_folder, selected_columns, k_value, threshold_value):
   data_ccc = pd.read_excel(os.path.join(os.path.dirname(__file__), 'files', 'default_of_credit_card_clients.xls'))
-  run_folder = _make_run_folder("ccc")
 
   # X2: SEX, X3: EDUCATION, X4: MARRIAGE, X5: AGE
   columns_ccc = ['X2', 'X3', 'X4', 'X5']
